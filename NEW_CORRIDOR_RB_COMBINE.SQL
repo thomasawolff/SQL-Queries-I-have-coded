@@ -1,5 +1,5 @@
 --create or replace view export_07_16_2015_north as
-/*select distinct s.corridor_code,
+select distinct s.corridor_code,
 s.corridor_code_rb,
 w.road_van,
 w.from_descr,
@@ -20,7 +20,7 @@ inner join north_files_roadway_descr w
 on w.frfpost_short = s.frfpost_short
 and w.svylength = s.svylength
 
-order by corridor_code,frfpost_short*/
+order by corridor_code,frfpost_short
 
 --create or replace view export_07_28_2015_south as
 select s.corridor_code,
