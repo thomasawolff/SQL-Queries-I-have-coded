@@ -61,21 +61,21 @@ create or replace view new_coll_corr_1_dont_use as
 select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as corridor_code_rb
 from TIS.TIS_NEW_ROADLOG t
 where t.nrlg_srf_type like 'PMS'
+(and t.nrlg_sys_desc not like 'OFF'
+and t.nrlg_sys_desc not like 'OUT'
+and t.nrlg_sys_desc not like 'CLO')
+(or t.nrlg_srf_type like 'PCC'
 and t.nrlg_sys_desc not like 'OFF'
 and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO'
-or t.nrlg_srf_type like 'PCC'
+and t.nrlg_sys_desc not like 'CLO')
+(or t.nrlg_srf_type like 'BST'
 and t.nrlg_sys_desc not like 'OFF'
 and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO'
-or t.nrlg_srf_type like 'BST'
+and t.nrlg_sys_desc not like 'CLO')
+(or t.nrlg_srf_type like 'RMS'
 and t.nrlg_sys_desc not like 'OFF'
 and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO'
-or t.nrlg_srf_type like 'RMS'
-and t.nrlg_sys_desc not like 'OFF'
-and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO'
+and t.nrlg_sys_desc not like 'CLO')
 minus
 select s.corridor_code_rb
 from ops$u2970.sec_segments_thomas s
@@ -90,7 +90,8 @@ from new_coll_corr_1_dont_use z,GN_DC_LOCATE b
 where z.corridor_code_rb=b.DC_ID
 UNION
 select z.corridor_code_rb,
-       e.gn_id,e.GN_DCMI TIS_MI,e.TIS_XCOORD TIS_X,e.TIS_YCOORD TIS_Y
+       e.gn_id,e.GN_DCMI TIS_MI,
+       e.TIS_XCOORD TIS_X,e.TIS_YCOORD TIS_Y
 from new_coll_corr_1_dont_use z,GN_DC_LOCATE e
 where z.corridor_code_rb=e.DC_ID
 order by 1,3
@@ -134,6 +135,7 @@ from
  ) dt
 WHERE rn = 1 
 ;
+---***Brings together min mile, max mile,corridor rb and coordinates for mapping
 create or replace view final_dataset_new_corr_2016 as
 select s.corridor_code_rb,s.tis_mi as begMi,t.tis_mi as endMi,
 s.tis_x as startX, s.tis_y as startY,t.tis_x as endX, t.tis_y as endY
