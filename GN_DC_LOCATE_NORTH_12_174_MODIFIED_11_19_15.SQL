@@ -143,8 +143,8 @@ from min_mile_new_corr_dont_use s join max_mile_new_corr_dont_use t on
 s.corridor_code_rb = t.corridor_code_rb
 order by 1
 ;
-select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as corridor_code_rb,
-nrlg_plan_route,
+select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as t.corridor_code_rb,
+t.nrlg_plan_route,
 t.nrlg_rte_name,
 v.begMi,
 v.endMi,
