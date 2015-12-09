@@ -142,4 +142,15 @@ s.tis_x as startX, s.tis_y as startY,t.tis_x as endX, t.tis_y as endY
 from min_mile_new_corr_dont_use s join max_mile_new_corr_dont_use t on
 s.corridor_code_rb = t.corridor_code_rb
 order by 1
-
+;
+select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as corridor_code_rb,
+nrlg_plan_route,
+t.nrlg_rte_name,
+v.begMi,
+v.endMi,
+t.nrlg_county,
+t.nrlg_srf_type
+from TIS.TIS_NEW_ROADLOG t join FINAL_DATASET_NEW_CORR_2016 v on
+concat(t.nrlg_dept_route,t.nrlg_roadbed) = v.corridor_code_rb
+where t.nrlg_srf_type not like 'GRV'
+order by 1
