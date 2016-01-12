@@ -135,14 +135,6 @@ from
  ) dt
 WHERE rn = 1 
 ;
----***Brings together min mile, max mile,corridor rb and coordinates for mapping
-create or replace view final_dataset_new_corr_2016 as
-select s.corridor_code_rb,s.tis_mi as begMi,t.tis_mi as endMi,
-s.tis_x as startX, s.tis_y as startY,t.tis_x as endX, t.tis_y as endY
-from min_mile_new_corr_dont_use s join max_mile_new_corr_dont_use t on
-s.corridor_code_rb = t.corridor_code_rb
-order by 1
-;
 ---***Creates the final dataset for new corridors to be included
 create or replace view final_dataset_new_corr_2016 as
 select distinct s.corridor_code_rb as corridor_rb,
