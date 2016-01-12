@@ -143,14 +143,19 @@ from min_mile_new_corr_dont_use s join max_mile_new_corr_dont_use t on
 s.corridor_code_rb = t.corridor_code_rb
 order by 1
 ;
-select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as t.corridor_code_rb,
-t.nrlg_plan_route,
-t.nrlg_rte_name,
-v.begMi,
-v.endMi,
-t.nrlg_county,
-t.nrlg_srf_type
-from TIS.TIS_NEW_ROADLOG t join FINAL_DATASET_NEW_CORR_2016 v on
-concat(t.nrlg_dept_route,t.nrlg_roadbed) = v.corridor_code_rb
-where t.nrlg_srf_type not like 'GRV'
-order by 1
+---***Creates the final dataset for new corridors to be included
+create or replace view final_dataset_new_corr_2016 as
+select distinct s.corridor_code_rb as corridor_rb,
+n.nrlg_rte_name as road_van,
+s.tis_mi as begMi,t.tis_mi as endMi,
+s.tis_x as tis_start_x, s.tis_y as tis_start_y,
+t.tis_x as tis_end_x,t.tis_y as tis_end_y,
+n.nrlg_plan_roadbed as roadbed,
+n.nrlg_srf_type as surf_type,
+n.nrlg_fdist as fin_dist
+from min_mile_new_corr_dont_use s join max_mile_new_corr_dont_use t on
+s.corridor_code_rb = t.corridor_code_rb join TIS.TIS_NEW_ROADLOG n on 
+t.corridor_code_rb = concat(n.nrlg_dept_route,n.nrlg_roadbed)
+where n.nrlg_srf_type not like 'GRV'
+and s.corridor_code_rb not like 'C000422N'
+order by corridor_rb
