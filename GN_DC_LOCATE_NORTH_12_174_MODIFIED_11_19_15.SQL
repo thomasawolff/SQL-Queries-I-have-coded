@@ -151,3 +151,50 @@ t.corridor_code_rb = concat(n.nrlg_dept_route,n.nrlg_roadbed)
 where n.nrlg_srf_type not like 'GRV'
 and s.corridor_code_rb not like 'C000422N'
 order by corridor_rb
+;
+create or replace view BLANKED_VAN_COLUMNS as
+select '' as van_no,
+'' as beg_gn,
+'' as end_gn,
+'' as corridor_code,
+'' as secfile_name,
+'' as county_name,
+'' as district_no,
+'' as from_descr,
+'' as to_descr,
+'' as frfpost,
+'' as trfpost,
+'' as dir,
+'' as svylength2012,
+'' as lane,
+'' as rb,
+'' as start_lat,
+'' as start_long,
+'' as end_lat,
+'' as end_long,
+'' as p
+from SEC_SEGMENTS_THOMAS_2016
+;
+select t.corridor_rb as corridor_code_rb,
+t.road_van as road_pathweb,
+s.van_no,s.beg_gn,s.end_gn,
+s.corridor_code,
+s.secfile_name,
+s.county_name,
+t.fin_dist as district_no,
+t.road_van,s.from_descr,s.to_descr,
+s.frfpost,s.trfpost,t.begMi,t.endMi,
+s.dir,s.svylength2012,
+s.lane,t.roadbed as rb,
+s.start_lat,start_long,end_lat,end_long,
+t.surf_type as p
+from BLANKED_VAN_COLUMNS s,DATASET_NEW_CORRIDORS_2016 t
+
+group by corridor_rb,t.road_van,
+s.van_no,s.beg_gn,s.end_gn,
+s.corridor_code,s.secfile_name,
+s.county_name,t.fin_dist,
+t.road_van,s.from_descr,s.to_descr,
+s.frfpost,s.trfpost,t.begMi,t.endMi,
+s.dir,s.svylength2012,s.lane,t.roadbed,
+s.start_lat,start_long,end_lat,end_long,t.surf_type
