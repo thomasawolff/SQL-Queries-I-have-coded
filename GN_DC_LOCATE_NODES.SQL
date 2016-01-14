@@ -98,13 +98,17 @@ order by 1,3
 ;
 --***Breaks down corridor mile data from above down to just min and max miles
 create or replace view new_coll_corr_3_dont_use as
-select t.gn_id,t.corridor_code_rb,t.TIS_MI,t.TIS_X,t.TIS_Y
+select t.gn_id,t.corridor_code_rb,
+t.TIS_MI,t.TIS_X,t.TIS_Y
 from new_coll_corr_2_dont_use t
-where t.tis_mi = (select min(tis_mi) from new_coll_corr_2_dont_use s)
+where t.tis_mi = (select min(tis_mi) 
+from new_coll_corr_2_dont_use s)
 union
-select t.gn_id,t.corridor_code_rb,t.TIS_MI,t.TIS_X,t.TIS_Y
+select t.gn_id,t.corridor_code_rb,
+t.TIS_MI,t.TIS_X,t.TIS_Y
 from new_coll_corr_2_dont_use t
-join (select corridor_code_rb,max(tis_mi) as tis_mi from new_coll_corr_2_dont_use
+join (select corridor_code_rb,max(tis_mi) 
+as tis_mi from new_coll_corr_2_dont_use
       group by corridor_code_rb) s
 on t.tis_mi = s.tis_mi
 ORDER BY 2,3
@@ -145,8 +149,10 @@ t.tis_x as tis_end_x,t.tis_y as tis_end_y,
 n.nrlg_plan_roadbed as roadbed,
 n.nrlg_srf_type as surf_type,
 n.nrlg_fdist as fin_dist
-from min_mile_new_corr_dont_use s join max_mile_new_corr_dont_use t on
-s.corridor_code_rb = t.corridor_code_rb join TIS.TIS_NEW_ROADLOG n on 
+from min_mile_new_corr_dont_use s 
+join max_mile_new_corr_dont_use t on
+s.corridor_code_rb = t.corridor_code_rb 
+join TIS.TIS_NEW_ROADLOG n on 
 t.corridor_code_rb = concat(n.nrlg_dept_route,n.nrlg_roadbed)
 where n.nrlg_srf_type not like 'GRV'
 and s.corridor_code_rb not like 'C000422N'
@@ -176,33 +182,80 @@ select '' as van_no,
 '' as p
 from SEC_SEGMENTS_THOMAS_2016
 ;
---*** Creates final new corridor dataset with blank columns to fill in using ArcGIS
+---*** Creates increasing data record for misisng corridors
+create or replace view final_corrs_all_rows_inc as
 select t.corridor_rb as corridor_code_rb,
 t.road_van as road_pathweb,
 s.van_no,s.beg_gn,s.end_gn,
-s.corridor_code,
+t.corridor_code,
 s.secfile_name,
 s.county_name,
 t.fin_dist as district_no,
 t.road_van,s.from_descr,s.to_descr,
-s.frfpost,s.trfpost,t.begMi,t.endMi,
-s.dir,s.svylength2012,
+s.frfpost,s.trfpost,
+t.begMi as begin_mi,
+t.endMi as end_mi,
+s.dir,s.svyleng2012,
 s.lane,t.roadbed as rb,
 t.tis_start_y as start_lat,
-t.tis_start_x as start_long,
+t.tis_start_x as start_lon,
 t.tis_end_y as end_lat,
-t.tis_end_x as end_long,
+t.tis_end_x as end_lon,
 t.surf_type as p
-from BLANKED_VAN_COLUMNS s,DATASET_NEW_CORRIDORS_2016 t
+from BLANKED_VAN_COLUMNS s,
+DATASET_NEW_CORRIDORS_2016 t
 group by corridor_rb,t.road_van,
 s.van_no,s.beg_gn,s.end_gn,
-s.corridor_code,s.secfile_name,
+t.corridor_code,s.secfile_name,
 s.county_name,t.fin_dist,
 t.road_van,s.from_descr,s.to_descr,
 s.frfpost,s.trfpost,
 t.begMi,t.endMi,
-s.dir,s.svylength2012,
+s.dir,s.svyleng2012,
 s.lane,t.roadbed,
 t.tis_start_y,t.tis_start_x,
 t.tis_end_y,t.tis_end_x,
 t.surf_type
+;
+---*** Creates decreasing data record for misisng corridors
+create or replace view final_corrs_all_rows_dec as
+select t.corridor_rb as corridor_code_rb,
+t.road_van as road_pathweb,
+s.van_no,s.beg_gn,s.end_gn,
+t.corridor_code,
+s.secfile_name,
+s.county_name,
+t.fin_dist as district_no,
+t.road_van,s.from_descr,s.to_descr,
+s.frfpost,s.trfpost,
+t.endMi as begin_mi,
+t.begMi as end_mi,
+s.dir,s.svyleng2012,
+s.lane,t.roadbed as rb,
+t.tis_end_y as start_lat,
+t.tis_end_x as start_lon,
+t.tis_start_y as end_lat,
+t.tis_start_x as end_lon,
+t.surf_type as p
+from BLANKED_VAN_COLUMNS s,
+DATASET_NEW_CORRIDORS_2016 t
+group by corridor_rb,t.road_van,
+s.van_no,s.beg_gn,s.end_gn,
+t.corridor_code,s.secfile_name,
+s.county_name,t.fin_dist,
+t.road_van,s.from_descr,s.to_descr,
+s.frfpost,s.trfpost,
+t.endMi,t.begMi,
+s.dir,s.svyleng2012,
+s.lane,t.roadbed,
+t.tis_end_y,t.tis_end_x,
+t.tis_start_y,t.tis_start_x,
+t.surf_type
+;
+---*** Combines increasing and decreasing records into one dataset
+select *
+from final_corrs_all_rows_dec s
+union all
+select *
+from final_corrs_all_rows_inc t
+order by 1,15
