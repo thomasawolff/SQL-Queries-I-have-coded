@@ -135,7 +135,7 @@ from
  ) dt
 WHERE rn = 1 
 ;
----***Creates the final dataset for new corridors to be included
+---***Creates the dataset for new corridors to be included
 create or replace view final_dataset_new_corr_2016 as
 select distinct s.corridor_code_rb as corridor_rb,
 n.nrlg_rte_name as road_van,
@@ -152,6 +152,7 @@ where n.nrlg_srf_type not like 'GRV'
 and s.corridor_code_rb not like 'C000422N'
 order by corridor_rb
 ;
+---*** Creates blank columns to place into dataset for new corridors
 create or replace view BLANKED_VAN_COLUMNS as
 select '' as van_no,
 '' as beg_gn,
@@ -175,6 +176,7 @@ select '' as van_no,
 '' as p
 from SEC_SEGMENTS_THOMAS_2016
 ;
+--*** Creates final new corridor dataset with blank columns to fill in using ArcGIS
 select t.corridor_rb as corridor_code_rb,
 t.road_van as road_pathweb,
 s.van_no,s.beg_gn,s.end_gn,
@@ -189,7 +191,6 @@ s.lane,t.roadbed as rb,
 s.start_lat,start_long,end_lat,end_long,
 t.surf_type as p
 from BLANKED_VAN_COLUMNS s,DATASET_NEW_CORRIDORS_2016 t
-
 group by corridor_rb,t.road_van,
 s.van_no,s.beg_gn,s.end_gn,
 s.corridor_code,s.secfile_name,
