@@ -1,4 +1,5 @@
---***Creates a VIEW of all TIS GN's with their Corridor ID, Accum Mile and XY coords
+
+--*** Creates a VIEW of all TIS GN's with their Corridor ID, Accum Mile and XY coords
 create or replace view GN_DC_LOCATE as
 select distinct t.gn_id, n.tcr_rt||n.tcr_rb DC_ID,
         case when n.beg_brkm<n.end_brkm then
@@ -9,26 +10,26 @@ from tis.tis_gn_locate t,tis.tis_tcr_lookup n,tis.tis_gn_coords c
 where t.route=n.br_id and t.gn_km>=n.beg_abskm and t.gn_km<=n.end_abskm
       and t.gn_id=c.gn_id
 ;
---***Creates a VIEW of all begin and end GN's on ops$u2087.sec_segments
+--*** Creates a VIEW of all begin and end GN's on ops$u2087.sec_segments
    --from the view GN_DC_LOCATE and adds in the records where GN=999999999999
 create or replace view PVMGT_SEGS_GNs_DCMI as
 select p.corridor_code_rb,
        b.gn_id,b.GN_DCMI TIS_MI,
        b.TIS_XCOORD TIS_X,b.TIS_YCOORD TIS_Y
-from ops$u2970.sec_segments_thomas p, GN_DC_LOCATE b
+from ops$u2970.sec_segments_thomas_2016 p, GN_DC_LOCATE b
 where p.corridor_code_rb=b.DC_ID and p.beg_gn=b.gn_id
 UNION
 select p.corridor_code_rb,
        e.gn_id,e.GN_DCMI TIS_MI,e.TIS_XCOORD TIS_X,e.TIS_YCOORD TIS_Y
-from ops$u2970.sec_segments_thomas p,GN_DC_LOCATE e
+from ops$u2970.sec_segments_thomas_2016 p,GN_DC_LOCATE e
 where p.corridor_code_rb=e.DC_ID and p.end_gn=e.gn_id
 UNION
 select p.corridor_code_rb,999999999999 GN_ID, NULL TIS_MI,NULL TIS_X,NULL TIS_Y
-from ops$u2970.sec_segments_thomas p
+from ops$u2970.sec_segments_thomas_2016 p
 where p.beg_gn=999999999999 or p.end_gn=999999999999
 order by 1,3
 ;
---***Creates a VIEW of all said GN's with their Reference Points
+--*** Creates a VIEW of all said GN's with their Reference Points
      -- and adds in the records where GN=999999999999
 create or replace view PVMGT_GNs_DCMI_RP as
 select t.corridor_code_rb,t.gn_id,t.TIS_MI,t.TIS_X,t.TIS_Y,
@@ -42,61 +43,64 @@ from PVMGT_SEGS_GNs_DCMI v
 where v.gn_id=999999999999
 order by corridor_code_rb,TIS_MI
 ;
---***Queries ops$u2087.sec_segments along with the TIS locations in the view PVMGT_GNs_DCMI_RP
+--*** Queries ops$u2087.sec_segments along with the TIS locations in the view PVMGT_GNs_DCMI_RP
 create or replace view VAN_DATA_VIEW_2016 as
 select p.*,
        lb.TIS_MI TIS_BEGMI,le.TIS_MI TIS_ENDMI,
        lb.TIS_X TIS_STARTX,lb.TIS_Y TIS_STARTY,
        le.TIS_X TIS_ENDX,le.TIS_Y TIS_ENDY,
        lb.REF_POINT TIS_BEGRP,le.REF_POINT TIS_ENDRP
-from ops$u2970.sec_segments_thomas p,PVMGT_GNs_DCMI_RP lb,PVMGT_GNs_DCMI_RP le
+from ops$u2970.sec_segments_thomas_2016 p,PVMGT_GNs_DCMI_RP lb,PVMGT_GNs_DCMI_RP le
 where p.corridor_code_rb=lb.corridor_code_rb and p.beg_gn=lb.gn_id
       and p.corridor_code_rb=le.corridor_code_rb and p.end_gn=le.gn_id
       --and p.van_no = '12174'
       --and secfile_name = 'North'
       order by p.corridor_code_rb,p.dir DESC,p.lane, p.begin_mi
 ;
---***Queries the roadlog for corridor records on system and paved that are not in van dataset
+---*** Do not touch anything below this line you have no reason to do so!!!!
+---*** Do not touch anything below this line you have no reason to do so!!!!
+
+---*** Queries the roadlog for corridor records on system and paved that are not in van dataset
 create or replace view new_coll_corr_1_dont_use as
 select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as corridor_code_rb
 from TIS.TIS_NEW_ROADLOG t
 where t.nrlg_srf_type like 'PMS'
-(and t.nrlg_sys_desc not like 'OFF'
-and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO')
-(or t.nrlg_srf_type like 'PCC'
 and t.nrlg_sys_desc not like 'OFF'
 and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO')
-(or t.nrlg_srf_type like 'BST'
+and t.nrlg_sys_desc not like 'CLO'
+or t.nrlg_srf_type like 'PCC'
 and t.nrlg_sys_desc not like 'OFF'
 and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO')
-(or t.nrlg_srf_type like 'RMS'
+and t.nrlg_sys_desc not like 'CLO'
+or t.nrlg_srf_type like 'BST'
 and t.nrlg_sys_desc not like 'OFF'
 and t.nrlg_sys_desc not like 'OUT'
-and t.nrlg_sys_desc not like 'CLO')
+and t.nrlg_sys_desc not like 'CLO'
+or t.nrlg_srf_type like 'RMS'
+and t.nrlg_sys_desc not like 'OFF'
+and t.nrlg_sys_desc not like 'OUT'
+and t.nrlg_sys_desc not like 'CLO'
 minus
 select s.corridor_code_rb
-from ops$u2970.sec_segments_thomas s
+from ops$u2970.SEC_SEGMENTS_THOMAS_2016 s
 order by 1
 ;
---***Combines the view data from above with mile and coordinate data from TIS
+--*** Combines the view data from above with mile and coordinate data from TIS
 create or replace view new_coll_corr_2_dont_use as
 select z.corridor_code_rb,
        b.gn_id,b.GN_DCMI TIS_MI,
        b.TIS_XCOORD TIS_X,b.TIS_YCOORD TIS_Y
 from new_coll_corr_1_dont_use z,GN_DC_LOCATE b
 where z.corridor_code_rb=b.DC_ID
-UNION
+union
 select z.corridor_code_rb,
-       e.gn_id,e.GN_DCMI TIS_MI,
-       e.TIS_XCOORD TIS_X,e.TIS_YCOORD TIS_Y
+       e.gn_id,e.GN_DCMI TIS_MI,e.TIS_XCOORD TIS_X,
+       e.TIS_YCOORD TIS_Y
 from new_coll_corr_1_dont_use z,GN_DC_LOCATE e
 where z.corridor_code_rb=e.DC_ID
 order by 1,3
 ;
---***Breaks down corridor mile data from above down to just min and max miles
+--*** Breaks down corridor mile data from above down to just min and max miles
 create or replace view new_coll_corr_3_dont_use as
 select t.gn_id,t.corridor_code_rb,
 t.TIS_MI,t.TIS_X,t.TIS_Y
@@ -113,7 +117,7 @@ as tis_mi from new_coll_corr_2_dont_use
 on t.tis_mi = s.tis_mi
 ORDER BY 2,3
 ;
---***Finds just the minimum or beginning mile for each new corridor
+--*** Finds just the minimum or beginning mile for each new corridor
 create or replace view min_mile_new_corr_dont_use as
 select corridor_code_rb,tis_mi,tis_x,tis_y
 from 
@@ -126,7 +130,7 @@ from
  ) dt
 WHERE rn = 1 
 ;
---***Finds just the maximum or ending mile for each new corridor
+--*** Finds just the maximum or ending mile for each new corridor
 create or replace view max_mile_new_corr_dont_use as
 select corridor_code_rb,tis_mi,tis_x,tis_y
 from 
@@ -139,16 +143,20 @@ from
  ) dt
 WHERE rn = 1 
 ;
----***Creates the dataset for new corridors to be included
-create or replace view final_dataset_new_corr_2016 as
-select distinct s.corridor_code_rb as corridor_rb,
-n.nrlg_rte_name as road_van,
-s.tis_mi as begMi,t.tis_mi as endMi,
-s.tis_x as tis_start_x, s.tis_y as tis_start_y,
-t.tis_x as tis_end_x,t.tis_y as tis_end_y,
-n.nrlg_plan_roadbed as roadbed,
-n.nrlg_srf_type as surf_type,
-n.nrlg_fdist as fin_dist
+---*** Creates the final dataset for new corridors to be included
+create or replace view DATASET_NEW_CORRIDORS_2016 as
+select distinct n.nrlg_dept_route as corridor_code,
+s.corridor_code_rb,
+n.nrlg_rte_name as road_pathweb,
+s.tis_mi as begin_mi,
+t.tis_mi as end_mi,
+s.tis_x as start_lon,
+s.tis_y as start_lat,
+t.tis_x as end_lon,
+t.tis_y as end_lat,
+n.nrlg_plan_roadbed as rb,
+n.nrlg_srf_type as p,
+n.nrlg_fdist as district_no
 from min_mile_new_corr_dont_use s 
 join max_mile_new_corr_dont_use t on
 s.corridor_code_rb = t.corridor_code_rb 
@@ -156,7 +164,7 @@ join TIS.TIS_NEW_ROADLOG n on
 t.corridor_code_rb = concat(n.nrlg_dept_route,n.nrlg_roadbed)
 where n.nrlg_srf_type not like 'GRV'
 and s.corridor_code_rb not like 'C000422N'
-order by corridor_rb
+order by 1
 ;
 ---*** Creates blank columns to place into dataset for new corridors
 create or replace view BLANKED_VAN_COLUMNS as
@@ -172,7 +180,7 @@ select '' as van_no,
 '' as frfpost,
 '' as trfpost,
 '' as dir,
-'' as svylength2012,
+'' as svyleng2012,
 '' as lane,
 '' as rb,
 '' as start_lat,
@@ -184,73 +192,85 @@ from SEC_SEGMENTS_THOMAS_2016
 ;
 ---*** Creates increasing data record for misisng corridors
 create or replace view final_corrs_all_rows_inc as
-select t.corridor_rb as corridor_code_rb,
-t.road_van as road_pathweb,
+select t.corridor_code_rb,
+t.road_pathweb,
 s.van_no,s.beg_gn,s.end_gn,
 t.corridor_code,
 s.secfile_name,
 s.county_name,
-t.fin_dist as district_no,
-t.road_van,s.from_descr,s.to_descr,
+t.district_no,
+t.road_pathweb as road_van,
+s.from_descr,s.to_descr,
 s.frfpost,s.trfpost,
-t.begMi as begin_mi,
-t.endMi as end_mi,
+t.begin_mi,t.end_mi,
 s.dir,s.svyleng2012,
-s.lane,t.roadbed as rb,
-t.tis_start_y as start_lat,
-t.tis_start_x as start_lon,
-t.tis_end_y as end_lat,
-t.tis_end_x as end_lon,
-t.surf_type as p
+s.lane,s.rb,
+t.start_lat,
+t.start_lon,
+t.end_lat,
+t.end_lon,
+t.p
 from BLANKED_VAN_COLUMNS s,
 DATASET_NEW_CORRIDORS_2016 t
-group by corridor_rb,t.road_van,
+group by t.corridor_code_rb,
+t.road_pathweb,
 s.van_no,s.beg_gn,s.end_gn,
-t.corridor_code,s.secfile_name,
-s.county_name,t.fin_dist,
-t.road_van,s.from_descr,s.to_descr,
+t.corridor_code,
+s.secfile_name,
+s.county_name,
+t.district_no,
+t.road_pathweb,s.from_descr,s.to_descr,
 s.frfpost,s.trfpost,
-t.begMi,t.endMi,
+t.begin_mi,t.end_mi,
 s.dir,s.svyleng2012,
-s.lane,t.roadbed,
-t.tis_start_y,t.tis_start_x,
-t.tis_end_y,t.tis_end_x,
-t.surf_type
+s.lane,s.rb,
+t.start_lat,
+t.start_lon,
+t.end_lat,
+t.end_lon,
+t.p
 ;
 ---*** Creates decreasing data record for misisng corridors
 create or replace view final_corrs_all_rows_dec as
-select t.corridor_rb as corridor_code_rb,
-t.road_van as road_pathweb,
+select corridor_code_rb,
+t.road_pathweb,
 s.van_no,s.beg_gn,s.end_gn,
 t.corridor_code,
 s.secfile_name,
 s.county_name,
-t.fin_dist as district_no,
-t.road_van,s.from_descr,s.to_descr,
+t.district_no,
+t.road_pathweb as road_van,
+s.from_descr,s.to_descr,
 s.frfpost,s.trfpost,
-t.endMi as begin_mi,
-t.begMi as end_mi,
+t.end_mi as begin_mi,
+t.begin_mi as end_mi,
 s.dir,s.svyleng2012,
-s.lane,t.roadbed as rb,
-t.tis_end_y as start_lat,
-t.tis_end_x as start_lon,
-t.tis_start_y as end_lat,
-t.tis_start_x as end_lon,
-t.surf_type as p
+s.lane,s.rb,
+t.end_lat as start_lat,
+t.end_lon as start_lon,
+t.start_lat as end_lat,
+t.start_lon as end_lon,
+t.p
 from BLANKED_VAN_COLUMNS s,
 DATASET_NEW_CORRIDORS_2016 t
-group by corridor_rb,t.road_van,
+group by corridor_code_rb,
+t.road_pathweb,
 s.van_no,s.beg_gn,s.end_gn,
-t.corridor_code,s.secfile_name,
-s.county_name,t.fin_dist,
-t.road_van,s.from_descr,s.to_descr,
+t.corridor_code,
+s.secfile_name,
+s.county_name,
+t.district_no,
+t.road_pathweb,s.from_descr,s.to_descr,
 s.frfpost,s.trfpost,
-t.endMi,t.begMi,
+t.end_mi,
+t.begin_mi,
 s.dir,s.svyleng2012,
-s.lane,t.roadbed,
-t.tis_end_y,t.tis_end_x,
-t.tis_start_y,t.tis_start_x,
-t.surf_type
+s.lane,s.rb,
+t.end_lat,
+t.end_lon,
+t.start_lat,
+t.start_lon,
+t.p
 ;
 ---*** Combines increasing and decreasing records into one dataset
 select *
