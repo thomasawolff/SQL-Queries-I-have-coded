@@ -57,9 +57,6 @@ where p.corridor_code_rb=lb.corridor_code_rb and p.beg_gn=lb.gn_id
       --and secfile_name = 'North'
       order by p.corridor_code_rb,p.dir DESC,p.lane, p.begin_mi
 ;
----*** Do not touch anything below this line you have no reason to do so!!!!
----*** Do not touch anything below this line you have no reason to do so!!!!
-
 ---*** Queries the roadlog for corridor records on system and paved that are not in van dataset
 create or replace view new_coll_corr_1_dont_use as
 select distinct concat(t.nrlg_dept_route,t.nrlg_roadbed) as corridor_code_rb
@@ -190,7 +187,7 @@ select '' as van_no,
 '' as p
 from SEC_SEGMENTS_THOMAS_2016
 ;
----*** Creates increasing data record for misisng corridors
+---*** Creates increasing data record for missng corridors
 create or replace view final_corrs_all_rows_inc as
 select t.corridor_code_rb,
 t.road_pathweb,
