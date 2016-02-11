@@ -49,9 +49,10 @@ select p.*,
        lb.TIS_X TIS_STARTX,lb.TIS_Y TIS_STARTY,
        le.TIS_X TIS_ENDX,le.TIS_Y TIS_ENDY,
        lb.REF_POINT TIS_BEGRP,le.REF_POINT TIS_ENDRP
-from ops$u2970.sec_segments_thomas_2016 p,PVMGT_GNs_DCMI_RP lb,PVMGT_GNs_DCMI_RP le
-where p.corridor_code_rb=lb.corridor_code_rb and p.beg_gn=lb.gn_id
-      and p.corridor_code_rb=le.corridor_code_rb and p.end_gn=le.gn_id
+from ops$u2970.sec_segments_thomas_2016 p left join PVMGT_GNs_DCMI_RP lb 
+on p.corridor_code_rb=lb.corridor_code_rb and p.beg_gn=lb.gn_id
+left join PVMGT_GNs_DCMI_RP le
+on p.corridor_code_rb=le.corridor_code_rb and p.end_gn=le.gn_id
       --and p.van_no = '12174'
       --and secfile_name = 'North'
       order by p.corridor_code_rb,p.dir DESC,p.lane, p.begin_mi
