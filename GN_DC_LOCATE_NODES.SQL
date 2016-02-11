@@ -280,9 +280,19 @@ from final_corrs_all_rows_inc t
 ;
 ---*** Combines new data with van dataset
 --create table SEC_SEGMENTS_THOMAS_2016_NEW as
---create or replace view COMBINED_COLL_DATA_SET as
+create or replace view COMBINED_COLL_DATA_SET as
 select * from NEW_SEGMENTS_DATA_VIEW
 union all
 select * 
 from sec_segments_thomas_2016
+--order by 3,1,17 desc,19,15
+;
+---*** Creates final dataset to be used for data collection
+create or replace view FINAL_DATASET_FOR_COLLECTION as
+select distinct t.*,s.TIS_BEGMI,s.TIS_ENDMI,s.TIS_STARTX,s.TIS_STARTY,s.TIS_ENDX,s.TIS_ENDY
+from VAN_DATA_VIEW_2016 s left join COMBINED_COLL_DATA_SET t
+on s.corridor_code_rb = t.CORRIDOR_CODE_RB
+and s.begin_mi = t.BEGIN_MI
+and s.frfpost = t.FRFPOST
+and s.svyleng2012 = t.SVYLENG2012
 order by 3,1,17 desc,19,15
