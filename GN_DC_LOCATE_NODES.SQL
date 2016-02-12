@@ -278,21 +278,24 @@ union all
 select *
 from final_corrs_all_rows_inc t
 ;
----*** Combines new data with van dataset
---create table SEC_SEGMENTS_THOMAS_2016_NEW as
-create or replace view COMBINED_COLL_DATA_SET as
-select * from NEW_SEGMENTS_DATA_VIEW
-union all
-select * 
-from sec_segments_thomas_2016
---order by 3,1,17 desc,19,15
+---*** Creates empty columns for final union with van data
+create or replace view TIS_MILES_COORDS as
+select
+cast (null as number) as TIS_BEGMI,
+cast (null as number) as TIS_ENDMI,
+cast (null as number) as TIS_STARTX,
+cast (null as number) as TIS_STARTY,
+cast (null as number) as TIS_ENDX,
+cast (null as number) as TIS_ENDY,
+cast (null as varchar(11)) as TIS_BEGRP,
+cast (null as varchar(11)) as TIS_ENDRP
+from van_data_view_2016
 ;
----*** Creates final dataset to be used for data collection
+---*** Creates the final dataset for analysis and collection
 create or replace view FINAL_DATASET_FOR_COLLECTION as
-select distinct t.*,s.TIS_BEGMI,s.TIS_ENDMI,s.TIS_STARTX,s.TIS_STARTY,s.TIS_ENDX,s.TIS_ENDY
-from VAN_DATA_VIEW_2016 s left join COMBINED_COLL_DATA_SET t
-on s.corridor_code_rb = t.CORRIDOR_CODE_RB
-and s.begin_mi = t.BEGIN_MI
-and s.frfpost = t.FRFPOST
-and s.svyleng2012 = t.SVYLENG2012
-order by 3,1,17 desc,19,15
+select t.*,s.*
+from NEW_SEGMENTS_DATA_VIEW t,TIS_MILES_COORDS s
+union all
+select t.* from VAN_DATA_VIEW_2016 t
+where t.corridor_code_rb <> 'C003102N'
+order by 3,7,1,17 desc,19,15
