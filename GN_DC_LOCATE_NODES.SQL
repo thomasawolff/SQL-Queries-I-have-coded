@@ -159,7 +159,6 @@ s.corridor_code_rb = t.corridor_code_rb
 join TIS.TIS_NEW_ROADLOG n on 
 t.corridor_code_rb = concat(n.nrlg_dept_route,n.nrlg_roadbed)
 where n.nrlg_srf_type not like 'GRV'
-and s.corridor_code_rb <> 'C000422N'
 order by 1
 ;
 ---*** Creates blank columns to place into dataset for new corridors
@@ -271,7 +270,7 @@ union all
 select *
 from final_corrs_all_rows_inc t
 ;
----*** Creates empty columns for final union with van data
+---*** Creates empty TIS columns for final union with van data
 create or replace view TIS_MILES_COORDS as
 select
 cast (null as number) as TIS_BEGMI,
@@ -288,7 +287,28 @@ from van_data_view
 create or replace view FINAL_DATASET_FOR_COLLECTION as
 select t.*,s.*
 from NEW_SEGMENTS_DATA_VIEW t,TIS_MILES_COORDS s
+where t.corridor_code_rb <> 'C003102N'
+and t.corridor_code_rb <> 'C000422N'
 union all
 select t.* from VAN_DATA_VIEW t
-where t.corridor_code_rb <> 'C003102N'
+order by 3,7,1,17 desc,19,15
+;
+---*** Builds view for forest roads to be excluded from sec file
+create or replace view FOREST_ROADS_VIEW as
+select distinct s.* 
+from TIS.TIS_FOREST_HIGHWAYS_TEMP t,
+TIS.TIS_FOREST_HIGHWAY x,
+FINAL_DATASET_FOR_COLLECTION s
+where t.tfh_hwy_num = x.tfh_attribute_id
+and (s.CORRIDOR_CODE like 'C0'||t.tfh_route
+and t.tfh_route > 600
+or s.ROAD_VAN like '%Ant Flat Road%')
+and s.SECFILE_NAME not like '%_Ur%'
+order by 3,7,1,17 desc,19,15
+;
+---*** Filters out the forest roads from the final collection dataset
+--create or replace view FINAL_DATASET_NO_FOREST as
+select * from FINAL_DATASET_FOR_COLLECTION s
+minus
+select distinct * from FOREST_ROADS_VIEW
 order by 3,7,1,17 desc,19,15
