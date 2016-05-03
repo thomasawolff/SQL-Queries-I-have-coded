@@ -311,4 +311,4 @@ order by 3,7,1,17 desc,19,15
 select * from FINAL_DATASET_FOR_COLLECTION s
 minus
 select distinct * from FOREST_ROADS_VIEW
-order by 3,7,1,17 desc,19,15
+order by 3,7,1,17 desc,19,15 
