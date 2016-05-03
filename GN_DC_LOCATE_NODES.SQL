@@ -307,7 +307,7 @@ and s.SECFILE_NAME not like '%_Ur%'
 order by 3,7,1,17 desc,19,15
 ;
 ---*** Filters out the forest roads from the final collection dataset
---create or replace view FINAL_DATASET_NO_FOREST as
+create or replace view FINAL_DATASET_NO_FOREST as
 select * from FINAL_DATASET_FOR_COLLECTION s
 minus
 select distinct * from FOREST_ROADS_VIEW
