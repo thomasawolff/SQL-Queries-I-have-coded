@@ -51,8 +51,8 @@ select p.*,
        lb.REF_POINT TIS_BEGRP,le.REF_POINT TIS_ENDRP
 from ops$u2970.sec_segments p left join PVMGT_GNs_DCMI_RP lb 
 on p.corridor_code_rb=lb.corridor_code_rb and p.beg_gn=lb.gn_id
-left join PVMGT_GNs_DCMI_RP le
-on p.corridor_code_rb=le.corridor_code_rb and p.end_gn=le.gn_id
+left join PVMGT_GNs_DCMI_RP le on p.corridor_code_rb=le.corridor_code_rb 
+and p.end_gn=le.gn_id
 order by p.corridor_code_rb,p.dir DESC,p.lane, p.begin_mi
 ;
 ---*** Queries the roadlog for corridor records 
@@ -284,7 +284,7 @@ cast (null as varchar(11)) as TIS_ENDRP
 from van_data_view
 ;
 ---*** Creates the final dataset for analysis and collection
-create or replace view FINAL_DATASET_FOR_COLLECTION as
+create or replace view FINAL_DATASET_WITH_FOREST as
 select t.*,s.*
 from NEW_SEGMENTS_DATA_VIEW t,TIS_MILES_COORDS s
 where t.corridor_code_rb <> 'C003102N'
@@ -298,7 +298,7 @@ create or replace view FOREST_ROADS_VIEW as
 select distinct s.* 
 from TIS.TIS_FOREST_HIGHWAYS_TEMP t,
 TIS.TIS_FOREST_HIGHWAY x,
-FINAL_DATASET_FOR_COLLECTION s
+FINAL_DATASET_WITH_FOREST s
 where t.tfh_hwy_num = x.tfh_attribute_id
 and (s.CORRIDOR_CODE like 'C0'||t.tfh_route
 and t.tfh_route > 600
@@ -308,7 +308,7 @@ order by 3,7,1,17 desc,19,15
 ;
 ---*** Filters out the forest roads from the final collection dataset
 create or replace view FINAL_DATASET_NO_FOREST as
-select * from FINAL_DATASET_FOR_COLLECTION s
+select * from FINAL_DATASET_WITH_FOREST s
 minus
 select distinct * from FOREST_ROADS_VIEW
-order by 3,7,1,17 desc,19,15 
+order by 3,7,1,17 desc,19,15
