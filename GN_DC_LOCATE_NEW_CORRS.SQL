@@ -1,4 +1,4 @@
-*** Creates a VIEW of all TIS GN's with their Corridor ID, Accum Mile and XY coords
+--*** Creates a VIEW of all TIS GN's with their Corridor ID, Accum Mile and XY coords
 create or replace view GN_DC_LOCATE as
 select distinct t.gn_id, n.tcr_rt||n.tcr_rb DC_ID,
         case when n.beg_brkm<n.end_brkm then
@@ -9,8 +9,8 @@ from tis.tis_gn_locate t,tis.tis_tcr_lookup n,tis.tis_gn_coords c
 where t.route=n.br_id and t.gn_km>=n.beg_abskm and t.gn_km<=n.end_abskm
       and t.gn_id=c.gn_id
 ;
-*** Creates a VIEW of all begin and end GN's on ops$u2970.sec_segments
-   --from the view GN_DC_LOCATE and adds in the records where GN=999999999999
+--*** Creates a VIEW of all begin and end GN's on ops$u2970.sec_segments
+--from the view GN_DC_LOCATE and adds in the records where GN=999999999999
 create or replace view PVMGT_SEGS_GNs_DCMI as
 select p.corridor_code_rb,
        b.gn_id,b.GN_DCMI TIS_MI,
@@ -28,7 +28,7 @@ from ops$u2970.sec_segments p
 where p.beg_gn=999999999999 or p.end_gn=999999999999
 order by 1,3
 ;
-*** Creates a VIEW of all said GN's with their Reference Points
+--*** Creates a VIEW of all said GN's with their Reference Points
 -- and adds in the records where GN=999999999999
 create or replace view PVMGT_GNs_DCMI_RP as
 select t.corridor_code_rb,t.gn_id,t.TIS_MI,t.TIS_X,t.TIS_Y,
