@@ -111,7 +111,7 @@ t.ASP_SUPPLIER,t.AVG_ADD2,t.ADD2_TYPE,t.ADD2_SUPPLIER,t.AVG_STAB,t.AVG_FLOW
 from bad_coords_out t
 order by 2
 ;
-create or replace view DATABASE_PROJECT_MAPPABLE as
+create or replace view DATABASE_PROJECT_DESIGN as
 select t.CONT_ID,t.Corridor_RB,
 t.FED_ST_PRJ_NBR as PROJECT_NUMBER,t.ROUTE_NBR,
 t.beg_termini as PROJECT_START,
@@ -155,13 +155,12 @@ on t.mix_id = s.mix_id
 inner join SMGR.T_CONT_MIX_DSN d
 on d.mix_id = s.mix_id
 ;
-create or replace view PROJECTS_MAPPABLE_DATA as
+create or replace view ASPHALT_PROJECTS_MAP_DATA as
 select distinct t.Corridor_RB,
 t.PROJECT_NUMBER,
 t.PROJECT_NAME as Description_,
 s.MIX_ID,t.CONT_ID as Contract_ID,
-t.PROJECT_START,
-t.PROJECT_END,
+PROJECT_START,PROJECT_END,
 t.CONTROL_NMBR as Control_Number,
 s.ESALS_NBR as ESALS,
 s.OPT_AC_PCT_TOT_WT as As_Built_AC,
@@ -180,30 +179,52 @@ t.DESIGN_AVG_DEN as Design_Density,
 t.DESIGN_RICE
 from AS_BUILT_DATA s inner join cont_ID_group i
 on s.cont_id = i.cont_id 
-right join DATABASE_PROJECT_MAPPABLE t
+right join DATABASE_PROJECT_DESIGN t
 on t.cont_id = i.cont_id
-where t.PROJECT_START not in 
-(select t.PROJECT_START from DATABASE_PROJECT_MAPPABLE t 
-where regexp_like(t.PROJECT_START,'[^0-9 | ^.]+'))
+where t.PROJECT_END not like '%..%'
+and t.PROJECT_START is not null
+and trim(t.PROJECT_START) is not null
+and t.PROJECT_START not in (select t.PROJECT_START from LONG_DENSITY t 
+                            where regexp_like(t.PROJECT_START,'[^0-9 | ^/.]+'))
 union all
-select * from PROJECTS_EXCEL_FILE_021517 b
+select * from PROJECTS_EXCEL_FILE_021617 t
 order by Corridor_RB,PROJECT_START,PROJECT_NUMBER
-/*;
-create or replace view NEW_ASPHALT_DATA_VIEW as
-select * from PROJECTS_MAPPABLE_DATA
-minus
-select * from PAST_PROJECTS_MAP_DATA_021517
 ;
-create or replace view DATA_CUT_OUT_BAD_MILAGES as
-select * from DATABASE_PROJECT_MAPPABLE t 
-where regexp_like(t.PROJECT_START,'[^0-9 | ^.]+') 
-or regexp_like(t.PROJECT_END,'[^0-9 | ^.]+')*/
-
-
-
-
-
-
+create or replace view NEWEST_ASPHALT_MAP_DATA as
+select * from ASPHALT_PROJECTS_MAP_DATA
+minus 
+select * from ASPHALT_PROJECTS_021617
+;
+create or replace view NO_MILES_OR_BAD_INPUTS as
+select distinct t.Corridor_RB,
+t.PROJECT_NUMBER,
+t.PROJECT_NAME as Description_,
+s.MIX_ID,t.CONT_ID as Contract_ID,
+PROJECT_START,PROJECT_END,
+t.CONTROL_NMBR as Control_Number,
+s.ESALS_NBR as ESALS,
+s.OPT_AC_PCT_TOT_WT as As_Built_AC,
+s.AIR_VOIDS_P as As_Built_Hamburg_Voids,
+s.VMA_P as As_Built_VMA,
+s.VFA_P as As_Built_VFA,
+s.BULK_SPC_GR_M as As_Built_Specific_Gravity,
+s.ASPH_CEM_T as As_Built_Mix_Type,
+t.ASPHALT_TYPE as Design_Mix_Type,
+t.DESIGN_AVG_AC as Design_AC,
+t.ADDTIVE_1_TYPE as Design_Additive,
+t.DESIGN_PERC_ADDITIVE,
+t.DESIGN_HAMBURG_VOIDS,
+t.DESIGN_VFA,
+t.DESIGN_AVG_DEN as Design_Density,
+t.DESIGN_RICE
+from AS_BUILT_DATA s inner join cont_ID_group i
+on s.cont_id = i.cont_id 
+right join DATABASE_PROJECT_DESIGN t
+on t.cont_id = i.cont_id
+union all
+select * from PROJECTS_EXCEL_FILE_021617 t
+minus
+select * from ASPHALT_PROJECTS_MAP_DATA
 
 
 
