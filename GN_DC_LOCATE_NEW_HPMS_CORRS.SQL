@@ -33,7 +33,7 @@ order by 1,3
 create or replace view PVMGT_GNs_DCMI_RP as
 select t.corridor_code_rb,t.gn_id,t.TIS_MI,t.TIS_X,t.TIS_Y,
 to_char(max(b.dc_rm),'009')||'+'||ltrim(to_char(min(t.TIS_MI-b.beg_dcmi),'0.999')) REF_POINT
-from PVMGT_SEGS_GNs_DCMI t join tis.tis_ref_marker_lookup b
+from PVMGT_SEGS_GNs_DCMI t inner join tis.tis_ref_marker_lookup b
 on t.corridor_code_rb=b.dc_id and t.TIS_MI>=b.beg_dcmi and t.TIS_MI<=b.end_dcmi
 group by t.corridor_code_rb,t.gn_id,t.TIS_MI,t.TIS_X,t.TIS_Y
 UNION
