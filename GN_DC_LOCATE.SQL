@@ -1,5 +1,7 @@
 
 --*** Creates a VIEW of all TIS GN's with their Corridor ID, Accum Mile and XY coords
+
+
 create or replace view GN_DC_LOCATE_PRE as
 select distinct t.gn_id, n.tcr_rt||n.tcr_rb as DC_ID,
         case when n.beg_brkm<n.end_brkm then
