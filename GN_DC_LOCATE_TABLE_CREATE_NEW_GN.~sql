@@ -1,5 +1,7 @@
----*** Queries the roadlog for corridor records 
----on system and paved that are not in van dataset
+
+
+------------------------******************************---------------------------------
+
 drop table NEW_CORRS_FINDER_TABLE
 ;
 create table NEW_CORRS_FINDER_TABLE as
