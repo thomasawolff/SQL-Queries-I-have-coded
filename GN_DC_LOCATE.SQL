@@ -1,3 +1,5 @@
+--*** I made changes to but did not originally write the code between lines 4 and 87 ***---
+
 
 --*** Creates a VIEW of all TIS GN's with their Corridor ID, Accum Mile and XY coords
 create or replace view GN_DC_LOCATE_PRE as
@@ -82,6 +84,8 @@ on p.corridor_code_rb=lb.corridor_code_rb and p.beg_gn=lb.gn_id
 left join PVMGT_GNs_DCMI_RP le on p.corridor_code_rb=le.corridor_code_rb 
 and p.end_gn=le.gn_id
 --order by p.corridor_code_rb,p.dir DESC,p.lane, p.begin_mi
+
+--*** I made changes to but did not originally write the code between lines 4 and 87 ***---
 ;
 ----------------*************************************************-----------------------------
 
