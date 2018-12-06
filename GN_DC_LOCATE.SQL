@@ -238,13 +238,6 @@ union
 select *
 from final_corrs_all_rows_dec s
 ;
-/*create table forest_highways_hwy_table as
-select cast(t.tfh_route as number) as Corridor
-from TIS.TIS_FOREST_HIGHWAYS_TEMP t
-group by t.tfh_route
-order by 1
-;
-alter table forest_highways_hwy_table add primary key(Corridor)*/
 
 ---*** Filters out the forest roads from the final collection dataset for van 12174
 create or replace view FINAL_DATASET_12174 as
@@ -273,6 +266,6 @@ from VAN_DATA_VIEW s inner join PVMT_EXT_MDT.forest_highways_hwy_table t
 on s.CORRIDOR_CODE like 'C0'||t.Corridor
 where s.VAN_NO = 12175 and t.Corridor > 600
 order by 3,7,1,17 desc,19,15
-;
+
 
 
