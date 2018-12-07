@@ -31,7 +31,7 @@ select p.corridor_code_rb,
 from PVMT_EXT_MDT.sec_segments p left join GN_DC_LOCATE e
 on p.corridor_code_rb=e.DC_ID and p.end_gn=e.gn_id
 UNION
-select p.corridor_code_rb,999999999999 GN_ID, NULL TIS_MI,NULL TIS_X,NULL TIS_Y
+select p.corridor_code_rb,999999999999 as GN_ID, NULL as TIS_MI,NULL as TIS_X,NULL as TIS_Y
 from PVMT_EXT_MDT.sec_segments p
 where p.beg_gn=999999999999 or p.end_gn=999999999999
 --order by 1,3
@@ -39,7 +39,7 @@ where p.beg_gn=999999999999 or p.end_gn=999999999999
 create or replace view PVMGT_SEGS_GNs_DCMI_VIEW as
 select * from PVMGT_SEGS_GNs_DCMI
 UNION
-select p.corridor_code_rb,999999999999 GN_ID, NULL TIS_MI,NULL TIS_X,NULL TIS_Y
+select p.corridor_code_rb,999999999999 as GN_ID, NULL as TIS_MI,NULL as TIS_X,NULL as TIS_Y
 from PVMT_EXT_MDT.sec_segments p
 where p.beg_gn=999999999999 or p.end_gn=999999999999
 --order by 1,2
@@ -53,7 +53,7 @@ from PVMGT_SEGS_GNs_DCMI_VIEW t inner join PVMT_EXT_MDT.TIS_REF_MARKER_LOOKUP_TA
 on t.corridor_code_rb=b.dc_id and t.TIS_MI>=b.beg_dcmi and t.TIS_MI<=b.end_dcmi
 group by t.corridor_code_rb,t.gn_id,t.TIS_MI,t.TIS_X,t.TIS_Y
 UNION
-select v.*, NULL REF_POINT
+select v.*, NULL as REF_POINT
 from PVMGT_SEGS_GNs_DCMI v
 where v.gn_id=999999999999
 --order by corridor_code_rb,TIS_MI
@@ -76,7 +76,7 @@ and p.end_gn=le.gn_id
 ---*** Queries the roadlog for corridor records 
 ---on system and paved that are not in van dataset
 create or replace view new_coll_corr_1_dont_use as
-select distinct concat(t.nrlg_dept_route,t.nrlg_dept_roadbed) as corridor_code_rb
+select distinct concat(t.nrlg_dept_route,t.nrlg_dept_roadbed) as corridor_code_rb,t.*
 from TIS.TIS_NEW_ROADLOG t
 where t.nrlg_srf_type in (select t.nrlg_srf_type from TIS.TIS_NEW_ROADLOG t where t.nrlg_srf_type = 'PMS'
                          or t.nrlg_srf_type = 'PCC' or t.nrlg_srf_type = 'BST' or t.nrlg_srf_type = 'RMS'
@@ -172,6 +172,7 @@ t.corridor_code_rb=concat(n.nrlg_dept_route,n.nrlg_dept_roadbed)
 where n.nrlg_srf_type not like 'GRV'
 and t.corridor_code_rb not like 'C003102N'
 and t.corridor_code_rb not like 'C000422N'
+and t.corridor_code_rb not like 'C000409N'
 --order by 1
 ;
 ---*** Creates increasing data record for missing corridors
@@ -184,8 +185,8 @@ t.corridor_code,
 null as secfile_name,
 t.county_name,
 cast(t.district_no as number) as district_no,
---t.road_pathweb as road_van,
-null as road_van,
+t.road_pathweb as road_van,
+--null as road_van,
 null as from_descr,
 null as to_descr,
 t.begin_mi as frfpost,
@@ -198,7 +199,7 @@ t.start_lat,
 t.start_lon,
 t.end_lat,
 t.end_lon,
-null as p
+t.p
 from DATASET_NEW_CORRIDORS t
 ;
 ---*** Creates decreasing data record for missing corridors
@@ -212,8 +213,8 @@ t.corridor_code,
 null as secfile_name,
 t.county_name,
 cast(t.district_no as number) as district_no,
---t.road_pathweb as road_van,
-null as road_van,
+t.road_pathweb as road_van,
+--null as road_van,
 null as from_descr,
 null as to_descr,
 t.end_mi as frfpost,
@@ -227,7 +228,7 @@ t.end_lat as start_lat,
 t.end_lon as start_lon,
 t.start_lat as end_lat,
 t.start_lon as end_lon,
-null as p
+t.p
 from DATASET_NEW_CORRIDORS t
 ;
 ---*** Combines increasing and decreasing records into one dataset
@@ -238,6 +239,13 @@ union
 select *
 from final_corrs_all_rows_dec s
 ;
+/*create table forest_highways_hwy_table as
+select cast(t.tfh_route as number) as Corridor
+from TIS.TIS_FOREST_HIGHWAYS_TEMP t
+group by t.tfh_route
+order by 1
+;
+alter table forest_highways_hwy_table add primary key(Corridor)*/
 
 ---*** Filters out the forest roads from the final collection dataset for van 12174
 create or replace view FINAL_DATASET_12174 as
@@ -266,6 +274,6 @@ from VAN_DATA_VIEW s inner join PVMT_EXT_MDT.forest_highways_hwy_table t
 on s.CORRIDOR_CODE like 'C0'||t.Corridor
 where s.VAN_NO = 12175 and t.Corridor > 600
 order by 3,7,1,17 desc,19,15
-
+;
 
 
