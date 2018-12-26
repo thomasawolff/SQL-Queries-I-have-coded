@@ -14,7 +14,7 @@ ROUND(dt.LEFT_RUT_AVG,3) as LEFT_RUT_AVG into DISTRESS_TABLE
               SUM(s.alligB_med) as ALLIGBMED, SUM(s.alligB_hig) as ALLIGBHIGH 
               FROM [Project_Data_Export].[dbo].[NORTH_EXPORT_FULL_2017$] s 
               where s.LANE = 1 
-              group by CORRIDOR_R ) dt 
+              group by CORRIDOR_R) dt
 on t.CORRIDOR_R = dt.CORRIDOR 
 where t.FROM_ = dt.BEGINMI 
 and SUBSTRING(t.CORRIDOR_R,2,6) < 600 
