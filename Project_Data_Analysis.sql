@@ -1,4 +1,4 @@
--- Aggregate the distress data into a joinable form with traffic data  
+  -- Aggregate the distress data into a joinable form with traffic data  
 SELECT t.CORRIDOR_R, dt.BEGINMI, dt.ENDMI,  
 ROUND(dt.ALLIGBMED,3) as 'ALLIGBMED (ft)',  
 ROUND(dt.ALLIGBHIGH,3) as 'ALLIGBHIGH (ft)',  
@@ -8,14 +8,13 @@ ROUND(dt.RIGHT_RUT_AVG,3) as RIGHT_RUT_AVG,
 ROUND(dt.LEFT_RUT_AVG,3) as LEFT_RUT_AVG into DISTRESS_TABLE 
   FROM [Project_Data_Export].[dbo].[NORTH_EXPORT_FULL_2017$] t 
   inner join (select s.CORRIDOR_R as CORRIDOR,  
-MIN(s.FROM_) as BEGINMI, MAX(s.TO_) as ENDMI,  
-AVG(s.RUT_L_AVG) as RIGHT_RUT_AVG, 
-AVG(s.RUT_R_AVG) as LEFT_RUT_AVG, 
-SUM(s.alligB_med) as ALLIGBMED, SUM(s.alligB_hig) as ALLIGBHIGH 
-FROM [Project_Data_Export].[dbo].[NORTH_EXPORT_FULL_2017$] s 
-where s.LANE = 1 
-group by CORRIDOR_R 
-) dt 
+              MIN(s.FROM_) as BEGINMI, MAX(s.TO_) as ENDMI,  
+              AVG(s.RUT_L_AVG) as RIGHT_RUT_AVG, 
+              AVG(s.RUT_R_AVG) as LEFT_RUT_AVG, 
+              SUM(s.alligB_med) as ALLIGBMED, SUM(s.alligB_hig) as ALLIGBHIGH 
+              FROM [Project_Data_Export].[dbo].[NORTH_EXPORT_FULL_2017$] s 
+              where s.LANE = 1 
+              group by CORRIDOR_R ) dt 
 on t.CORRIDOR_R = dt.CORRIDOR 
 where t.FROM_ = dt.BEGINMI 
 and SUBSTRING(t.CORRIDOR_R,2,6) < 600 
@@ -38,13 +37,12 @@ ROUND((dt.LARGE_TRUCK / ENDMI),5) as LARGE_TRUCK_RATIO,
 ROUND((dt.COMMERCIAL / ENDMI),5) as COMMERCIAL_RATIO INTO TRAFFIC_TABLE 
   FROM [Project_Data_Export].[dbo].[TRAFFIC_DATA_2017$] s 
   inner join (select t.[CORRIDORRB] AS ROUTE_, SUM(T.TYC_AADT) AS SUM_AADT, 
-ROUND(SUM(T.TYC_AADT)/MAX(t.ENDMI),3) AS AADT_PER_MILE,  
-MIN(t.BEGMI) as BEGMI, MAX(t.ENDMI) AS ENDMI,  
-SUM(t.TYC_COMMERCIAL) AS COMMERCIAL,  
-SUM(TYC_LARGE_TRUCK) AS LARGE_TRUCK 
-from [Project_Data_Export].[dbo].[TRAFFIC_DATA_2017$] t 
-group by t.[CORRIDORRB] 
-) dt 
+              ROUND(SUM(T.TYC_AADT)/MAX(t.ENDMI),3) AS AADT_PER_MILE,  
+              MIN(t.BEGMI) as BEGMI, MAX(t.ENDMI) AS ENDMI,  
+              SUM(t.TYC_COMMERCIAL) AS COMMERCIAL,  
+              SUM(TYC_LARGE_TRUCK) AS LARGE_TRUCK 
+              from [Project_Data_Export].[dbo].[TRAFFIC_DATA_2017$] t 
+              group by t.[CORRIDORRB]) dt 
 on s.[CORRIDORRB] = dt.ROUTE_ 
 where SUBSTRING(dt.ROUTE_,2,6) < 600  
 and dt.COMMERCIAL is not null and dt.LARGE_TRUCK is not null 
