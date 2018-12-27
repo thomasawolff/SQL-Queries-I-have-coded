@@ -15,6 +15,5 @@ and t.nrlg_sys_desc not in (select t.nrlg_sys_desc from TIS.TIS_NEW_ROADLOG t
 and t.nrlg_srf_type in (select t.nrlg_srf_type from TIS.TIS_NEW_ROADLOG t where t.nrlg_srf_type = 'PMS'
                          or t.nrlg_srf_type = 'PCC' or t.nrlg_srf_type = 'BST' or t.nrlg_srf_type = 'RMS'
                          group by t.nrlg_srf_type) 
-and t.nrlg_dept_route in (select e.corridor_code as corridor from sec_segments e where e.secfile_name like 'North' group by e.corridor_code)
 group by t.nrlg_dept_route,dt.begmile,dt.endmile
 order by 1
