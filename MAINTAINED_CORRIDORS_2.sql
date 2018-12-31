@@ -14,9 +14,8 @@ inner join (select d.nrlg_dept_route||d.nrlg_dept_roadbed as corridor,d.nrlg_sma
                                      where f.nrlg_smaint like 'Y' group by f.nrlg_dept_route)
            group by d.nrlg_dept_route||d.nrlg_dept_roadbed,d.nrlg_smaint) dt
 on t.nrlg_dept_route||t.nrlg_dept_roadbed = dt.corridor and dt.maintain = t.nrlg_smaint
-where t.nrlg_sys_desc is not null and 
-t.nrlg_dept_route||t.nrlg_dept_roadbed in (select t.hpms from HPMS_DATA t inner join final_dataset_12174 s 
-                                           on t.hpms = s."CORRIDOR_CODE_RB" 
-                                           where s."SECFILE_NAME" not like 'North')
+where t.nrlg_dept_route||t.nrlg_dept_roadbed in (select t.hpms from HPMS_DATA t inner join final_dataset_12174 s 
+                                                 on t.hpms = s."CORRIDOR_CODE_RB" 
+                                                 where s."SECFILE_NAME" not like 'North')
 group by t.nrlg_dept_route||t.nrlg_dept_roadbed,dt.begmile,dt.endmile
 order by 1
