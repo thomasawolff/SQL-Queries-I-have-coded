@@ -1,4 +1,5 @@
-select f.corridor_code_rb,s.route_id as HPMS,
+---*** Query finds all corridors that are either state maintained or HPMS routes
+Select f.corridor_code_rb,s.route_id as HPMS,
 dt.roadlog,dt.maintained,dt.descr,
 dt.begin_mi,dt.end_mi
 from FINAL_DATASET_12174 f
