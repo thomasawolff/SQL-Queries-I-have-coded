@@ -1,4 +1,5 @@
-           select t.nrlg_dept_route||t.nrlg_dept_roadbed,dt.begmile,dt.endmile
+
+select t.nrlg_dept_route||t.nrlg_dept_roadbed,dt.begmile,dt.endmile
 from TIS.TIS_NEW_ROADLOG t
 inner join (select d.nrlg_dept_route||d.nrlg_dept_roadbed as corridor,d.nrlg_smaint as maintain,
            min(d.nrlg_dept_length_mi) as begmile,
