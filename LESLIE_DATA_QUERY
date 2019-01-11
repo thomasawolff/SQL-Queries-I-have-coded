@@ -1,4 +1,5 @@
-create or replace view lesliemaxdata as
+---*** Takes the max or the value of the only entry in a column
+create or replace view maxdataset as
 select t.smpl_id,
 t.matl_cd,t.geog_area_t,
 max(t.assay) as assay,
@@ -6,7 +7,7 @@ max(t.effectiveness_pns_score_) as effectiveness_pns_score,
 max(t.pns_blank) as pns_blank,
 max(t.pns_nacl) as pns_nacl,
 max(t.settable_solids) as settable_solids,
-max(t.pass_10m) as perc_pass_10m,
+max(t.perc_pass_10m) as perc_pass_10m,
 max(t.ph) as ph,
 max(t.as_) as as_,
 max(t.ba) as ba,
@@ -28,17 +29,18 @@ min(t.mg) as mg,
 max(t.nitrite) as nitrite,
 max(t.nitrate) as nitrate,
 max(t.chloride) as chloride
-from leslie_data_2016_2 t
+from leslietable t
 group by t.smpl_id,t.matl_cd,t.geog_area_t
 ;
+---*** Removes just test ID rows with columns having more than one entry per test ID
 create or replace view doubleEffect_short as
 select t.smpl_id
-from leslie_data_2016_2 t inner join leslie_data_2016_2 s
+from LESLIETABLE t inner join LESLIETABLE s
 on t.smpl_id = s.smpl_id where 
 (t.effectiveness_pns_score_ <> s.effectiveness_pns_score_) or 
 (t.pns_blank <> s.pns_blank) or (t.pns_nacl <> s.pns_nacl) or
 (t.settable_solids <> s.settable_solids) or
-(t.pass_10m <> s.pass_10m) or
+(t.perc_pass_10m <> s.perc_pass_10m) or
 (t.ph <> s.ph) or (t.as_ <> s.as_) or
 (t.as_ <> s.as_) or (t.ba <> s.ba) or
 (t.cd <> s.cd) or (t.cr <> s.cr) or
@@ -53,15 +55,17 @@ on t.smpl_id = s.smpl_id where
 group by t.smpl_id
 order by t.smpl_id
 ;
+---*** Outputs all columns from max data set having more than one value per column
 create or replace view final_data_sifter as
 select  t.smpl_id,t.matl_cd,t.geog_area_t,t.assay,t.effectiveness_pns_score,
 t.pns_blank,t.pns_nacl,t.settable_solids,t.perc_pass_10m,t.ph,t.as_,t.ba,t.cd,
 t.cr,t.cu,t.pb,t.hg,t.se,t.zn,t.cn,t.p,t.s,t.sulfate,t.phosphate,t.k,t.ca,t.mg,
 t.nitrite,t.nitrate,t.chloride 
-from lesliemaxdata t join doubleeffect_short s
+from maxdataset t join doubleeffect_short s
 on t.smpl_id = s.smpl_id
 ;
---create or replace view finalDataset_incomplete as
-select * from lesliemaxdata t
+---*** Sutracts rows with multiple values per column from max data set 
+create or replace view finalDataset_incomplete as
+select * from maxdataset t
 minus
 select * from final_data_sifter
