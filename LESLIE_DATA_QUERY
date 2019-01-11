@@ -1,0 +1,67 @@
+create or replace view lesliemaxdata as
+select t.smpl_id,
+t.matl_cd,t.geog_area_t,
+max(t.assay) as assay,
+max(t.effectiveness_pns_score_) as effectiveness_pns_score,
+max(t.pns_blank) as pns_blank,
+max(t.pns_nacl) as pns_nacl,
+max(t.settable_solids) as settable_solids,
+max(t.pass_10m) as perc_pass_10m,
+max(t.ph) as ph,
+max(t.as_) as as_,
+max(t.ba) as ba,
+max(t.cd) as cd,
+max(t.cr) as cr,
+max(t.cu) as cu,
+max(t.pb) as pb,
+max(t.hg) as hg,
+max(t.se) as se,
+max(t.zn) as zn,
+max(t.cn) as cn,
+max(t.p) as p,
+max(t.s) as s,
+max(t.sulfate) as sulfate,
+max(t.phosphate) as phosphate,
+max(t.k) as k,
+max(t.ca) as ca,
+min(t.mg) as mg,
+max(t.nitrite) as nitrite,
+max(t.nitrate) as nitrate,
+max(t.chloride) as chloride
+from leslie_data_2016_2 t
+group by t.smpl_id,t.matl_cd,t.geog_area_t
+;
+create or replace view doubleEffect_short as
+select t.smpl_id
+from leslie_data_2016_2 t inner join leslie_data_2016_2 s
+on t.smpl_id = s.smpl_id where 
+(t.effectiveness_pns_score_ <> s.effectiveness_pns_score_) or 
+(t.pns_blank <> s.pns_blank) or (t.pns_nacl <> s.pns_nacl) or
+(t.settable_solids <> s.settable_solids) or
+(t.pass_10m <> s.pass_10m) or
+(t.ph <> s.ph) or (t.as_ <> s.as_) or
+(t.as_ <> s.as_) or (t.ba <> s.ba) or
+(t.cd <> s.cd) or (t.cr <> s.cr) or
+(t.cu <> s.cu) or (t.pb <> s.pb) or
+(t.hg <> s.hg) or (t.se <> s.se) or
+(t.zn <> s.zn) or (t.cn <> s.cn) or
+(t.p <> s.p) or (t.sulfate <> s.sulfate) or
+(t.phosphate <> s.phosphate) or
+(t.k <> s.k) or (t.ca <> s.ca) or
+(t.mg <> s.mg) or (t.nitrite <> s.nitrite) or
+(t.nitrate <> s.nitrate) or (t.chloride <> s.chloride)
+group by t.smpl_id
+order by t.smpl_id
+;
+create or replace view final_data_sifter as
+select  t.smpl_id,t.matl_cd,t.geog_area_t,t.assay,t.effectiveness_pns_score,
+t.pns_blank,t.pns_nacl,t.settable_solids,t.perc_pass_10m,t.ph,t.as_,t.ba,t.cd,
+t.cr,t.cu,t.pb,t.hg,t.se,t.zn,t.cn,t.p,t.s,t.sulfate,t.phosphate,t.k,t.ca,t.mg,
+t.nitrite,t.nitrate,t.chloride 
+from lesliemaxdata t join doubleeffect_short s
+on t.smpl_id = s.smpl_id
+;
+--create or replace view finalDataset_incomplete as
+select * from lesliemaxdata t
+minus
+select * from final_data_sifter
