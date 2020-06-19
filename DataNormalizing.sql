@@ -52,14 +52,15 @@ SELECT [fips]
 	where i.[Living with Income Assistance] is not NULL
 	order by 1
 
+create unique clustered index AgesDemoDataNewColUniq on AgesDemoDataNewCol(Fips)
 
-
-SELECT TOP (1000) [Fips]
+SELECT TOP (1000) s.[Fips]
       ,[State]
       ,[County]
 	  ,[TOT_POP] as Total_Population
       ,[TOT_MALE] as Total_Male
       ,[TOT_FEMALE] as Total_Female
+	  ,a.*
       ,[Positives]
       ,[Positives_Per_100_000] as [Positives_Per_100,000]
       ,[Deaths]
@@ -111,4 +112,4 @@ SELECT TOP (1000) [Fips]
       ,round((cast([NA_FEMALE] as float)/cast([TOT_FEMALE] as float))*100,2) as [Native_Hawaiian_or_Pacific_Islands_Female (Percent)]
       ,round((cast([TOM_MALE] as float)/cast(TOT_MALE as float))*100,2) as [Two_Or_More_Races_Male (Percent)]
       ,round((cast([TOM_FEMALE] as float)/cast([TOT_FEMALE] as float))*100,2) as [Two_Or_More_Races_Female (Percent)]
-  FROM [Covid_Course_Project].[dbo].[CountyCovidDataAll2]
+  FROM [Covid_Course_Project].[dbo].[CountyCovidDataAll2] s inner join AgesDemoDataNewCol a on s.Fips = a.Fips
