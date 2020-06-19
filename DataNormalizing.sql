@@ -52,6 +52,8 @@ SELECT [fips]
 	where i.[Living with Income Assistance] is not NULL
 	order by 1
 
+
+
 SELECT TOP (1000) [Fips]
       ,[State]
       ,[County]
