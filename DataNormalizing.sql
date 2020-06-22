@@ -54,7 +54,37 @@ SELECT [fips]
 
 create unique clustered index AgesDemoDataNewColUniq on AgesDemoDataNewCol(Fips)
 
-SELECT TOP (1000) s.[Fips]
+
+  SELECT [County_Fips]
+      ,sum(cast([Residents_Weekly_Admissions_COVID_19] as int)) as Residents_Weekly_Admissions_COVID_19
+      ,sum(cast([Residents_Total_Admissions_COVID_19] as int)) as Residents_Total_Admissions_COVID_19
+      ,sum(cast([Residents_Weekly_Confirmed_COVID_19] as int)) as Residents_Weekly_Confirmed_COVID_19
+      ,sum(cast([Residents_Total_Confirmed_COVID_19] as int)) as Residents_Total_Confirmed_COVID_19
+      ,sum(cast([Residents_Weekly_Suspected_COVID_19] as int)) as Residents_Weekly_Suspected_COVID_19
+      ,sum(cast([Residents_Total_Suspected_COVID_19] as int)) as Residents_Total_Suspected_COVID_19
+      ,sum(cast([Residents_Weekly_All_Deaths] as int)) as Residents_Weekly_All_Deaths
+      ,sum(cast([Residents_Total_All_Deaths] as int)) as Residents_Total_All_Deaths
+      ,sum(cast([Residents_Weekly_COVID_19_Deaths] as int)) as Residents_Weekly_COVID_19_Deaths
+      ,sum(cast([Residents_Total_COVID_19_Deaths] as int)) as Residents_Total_COVID_19_Deaths
+      ,sum(cast([Number_of_All_Beds] as int)) as Number_of_All_Beds
+      ,sum(cast([Staff_Weekly_Confirmed_COVID_19] as int)) as Staff_Weekly_Confirmed_COVID_19
+      ,sum(cast([Staff_Total_Confirmed_COVID_19] as int)) as Staff_Total_Confirmed_COVID_19
+      ,sum(cast([Staff_Weekly_Suspected_COVID_19] as int)) as Staff_Weekly_Suspected_COVID_19
+      ,sum(cast([Staff_Total_Suspected_COVID_19] as int)) as Staff_Total_Suspected_COVID_19
+      ,sum(cast([Staff_Weekly_COVID_19_Deaths] as int)) as Staff_Weekly_COVID_19_Deaths
+      ,sum(cast([Staff_Total_COVID_19_Deaths] as int)) as Staff_Total_COVID_19_Deaths
+      ,sum(cast([Total_Resident_Confirmed_COVID_19_Cases_Per_1_000_Residents] as float)) as Total_Resident_Confirmed_COVID_19_Cases_Per_1_000_Residents
+      ,sum(cast([Total_Resident_COVID_19_Deaths_Per_1_000_Residents] as float)) as Total_Resident_COVID_19_Deaths_Per_1_000_Residents
+      ,sum(cast([Total_Residents_COVID_19_Deaths_as_a_Percentage_of_Confirmed_COVID_19_Cases] as float)) as Total_Residents_COVID_19_Deaths_as_a_Percentage_of_Confirmed_COVID_19_Cases
+	  into NursingHomesCountyCases
+  FROM [Covid Course Project].[dbo].[NursingHomeDataCountyUS] 
+  group by [County_Fips]
+
+  create unique clustered index NursingHomesCountyCasesUnique on NursingHomesCountyCases(County_Fips)
+
+
+
+SELECT s.[Fips]
       ,[State]
       ,[County]
 	  ,[TOT_POP] as Total_Population
@@ -111,5 +141,9 @@ SELECT TOP (1000) s.[Fips]
       ,round((cast([NA_MALE] as float)/cast(TOT_MALE as float))*100,2) as [Native_Hawaiian_or_Pacific_Islands_Male (Percent)]
       ,round((cast([NA_FEMALE] as float)/cast([TOT_FEMALE] as float))*100,2) as [Native_Hawaiian_or_Pacific_Islands_Female (Percent)]
       ,round((cast([TOM_MALE] as float)/cast(TOT_MALE as float))*100,2) as [Two_Or_More_Races_Male (Percent)]
-      ,round((cast([TOM_FEMALE] as float)/cast([TOT_FEMALE] as float))*100,2) as [Two_Or_More_Races_Female (Percent)]
-  FROM [Covid_Course_Project].[dbo].[CountyCovidDataAll2] s inner join AgesDemoDataNewCol a on s.Fips = a.Fips
+      ,round((cast([TOM_FEMALE] as float)/cast([TOT_FEMALE] as float))*100,2) as [Two_Or_More_Races_Female (Percent)],n.*
+  FROM [Covid_Course_Project].[dbo].[CountyCovidDataAll2] s 
+  inner join AgesDemoDataNewCol a on s.Fips = a.Fips
+  
+
+
