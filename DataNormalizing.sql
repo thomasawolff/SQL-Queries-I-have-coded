@@ -55,7 +55,7 @@ SELECT [fips]
 create unique clustered index AgesDemoDataNewColUniq on AgesDemoDataNewCol(Fips)
 
 
-  SELECT [County_Fips]
+  SELECT [County_Fips],max(dt.Total_Facilities) as Total_Facilities
       ,sum(cast([Residents_Weekly_Admissions_COVID_19] as int)) as Residents_Weekly_Admissions_COVID_19
       ,sum(cast([Residents_Total_Admissions_COVID_19] as int)) as Residents_Total_Admissions_COVID_19
       ,sum(cast([Residents_Weekly_Confirmed_COVID_19] as int)) as Residents_Weekly_Confirmed_COVID_19
@@ -67,6 +67,7 @@ create unique clustered index AgesDemoDataNewColUniq on AgesDemoDataNewCol(Fips)
       ,sum(cast([Residents_Weekly_COVID_19_Deaths] as int)) as Residents_Weekly_COVID_19_Deaths
       ,sum(cast([Residents_Total_COVID_19_Deaths] as int)) as Residents_Total_COVID_19_Deaths
       ,sum(cast([Number_of_All_Beds] as int)) as Number_of_All_Beds
+	  ,sum(cast([Total_Number_of_Occupied_Beds] as int)) as Total_Number_of_Occupied_Beds
       ,sum(cast([Staff_Weekly_Confirmed_COVID_19] as int)) as Staff_Weekly_Confirmed_COVID_19
       ,sum(cast([Staff_Total_Confirmed_COVID_19] as int)) as Staff_Total_Confirmed_COVID_19
       ,sum(cast([Staff_Weekly_Suspected_COVID_19] as int)) as Staff_Weekly_Suspected_COVID_19
@@ -76,11 +77,14 @@ create unique clustered index AgesDemoDataNewColUniq on AgesDemoDataNewCol(Fips)
       ,sum(cast([Total_Resident_Confirmed_COVID_19_Cases_Per_1_000_Residents] as float)) as Total_Resident_Confirmed_COVID_19_Cases_Per_1_000_Residents
       ,sum(cast([Total_Resident_COVID_19_Deaths_Per_1_000_Residents] as float)) as Total_Resident_COVID_19_Deaths_Per_1_000_Residents
       ,sum(cast([Total_Residents_COVID_19_Deaths_as_a_Percentage_of_Confirmed_COVID_19_Cases] as float)) as Total_Residents_COVID_19_Deaths_as_a_Percentage_of_Confirmed_COVID_19_Cases
-	  into NursingHomesCountyCases
-  FROM [Covid Course Project].[dbo].[NursingHomeDataCountyUS] 
+	  ,sum(cast([Number_of_Ventilators_in_Facility] as int)) as Number_of_Ventilators_in_Facility
+      ,sum(cast([Number_of_Ventilators_in_Use_for_COVID_19] as int)) as Number_of_Ventilators_in_Use_for_COVID_19
+	  into NursingHomesCountyCases2 
+  FROM (select County_Fips as Fips,row_number() over (partition by [Provider_Zip_Code] order by [County_Fips]) as Total_Facilities from [Covid Course Project].[dbo].[NursingHomeDataCountyUS]) dt
+  inner join [Covid Course Project].[dbo].[NursingHomeDataCountyUS] n on dt.Fips = n.County_Fips
   group by [County_Fips]
 
-  create unique clustered index NursingHomesCountyCasesUnique on NursingHomesCountyCases(County_Fips)
+  create unique clustered index NursingHomesCountyCasesUnique on NursingHomesCountyCases2(County_Fips)
 
 
 
